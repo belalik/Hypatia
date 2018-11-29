@@ -13,11 +13,30 @@ namespace Hypatia
         static string home = "\\\\syros-fs.aegean.gr\\Syros_Staff\\tkogias\\hypatia\\hypatia.save";
         static string uni = "Z:\\hypatia\\hypatia.save";
 
-        static Library aegeanLibrary = new Library(home);
+        static Library aegeanLibrary = new Library(uni);
+
+
+        //static Video videotest = new Video("test", 120);
+        //static Book booktest = aegeanLibrary.Books.ElementAt(0);
 
         public static void Main(string[] args)
         {
-            
+            /*
+             * NOTICE the difference in .GetType() == typeOf [answers True only in exact match] 
+             * and the 'is' keyword comparison [answers True for exact match OR parent class]
+             */
+
+            /*
+            Console.WriteLine("Checking if videotest.GetType() == typeOf(Video): "+(videotest.GetType() == typeof(Video)));
+            Console.WriteLine("Checking if videotest.GetType() == typeOf(Journal): " + (videotest.GetType() == typeof(Journal)));
+            Console.WriteLine("Checking if videotest.GetType() == typeOf(Item): " + (videotest.GetType() == typeof(Item)));
+
+            Console.WriteLine("Checking (videotest is Video): " + (videotest is Video));
+            Console.WriteLine("Checking (videotest is Journal): " + (videotest is Journal));
+            Console.WriteLine("Checking (videotest is Item): " + (videotest is Item));
+
+            Console.ReadLine();
+            */
             MainMenu();
         }
 
@@ -62,6 +81,7 @@ namespace Hypatia
                     Console.WriteLine("[5] Check Overdue Loans");
                     Console.WriteLine("[8] Save ALL settings");
                     Console.WriteLine("[9] Load ALL settings");
+                    Console.WriteLine("[0] Return to MAIN MENU");
                     Console.WriteLine("--------------------\n");
                     Console.WriteLine("Please select an option\n");
                     break;
@@ -83,8 +103,8 @@ namespace Hypatia
 
                         Console.WriteLine();
                         Console.WriteLine("[1] Borrow Item");
-                        Console.WriteLine("[2] choice 2");
-                        Console.WriteLine("[3] choice 3");
+                        Console.WriteLine("[2] Return Item");
+                        Console.WriteLine("[3] Currently Loaned Items");
                         Console.WriteLine("Back to Main Menu");
                         Console.WriteLine("--------------------\n");
                         Console.WriteLine("Please select an option\n");
@@ -163,9 +183,12 @@ namespace Hypatia
 
                         case 9:
                             
-                            
                             aegeanLibrary.LoadSettings();
                             Console.WriteLine("Settings loaded successfully");
+                            break;
+
+                        case 0:
+                            Console.WriteLine("Returning to main menu...");
                             break;
                     }
                     PressAnyKey();
@@ -178,7 +201,7 @@ namespace Hypatia
                     {
                         case 1:
                             // show all items
-
+                            aegeanLibrary.ShowAllItems();
                             break;
 
                         case 2:
@@ -188,12 +211,12 @@ namespace Hypatia
                             break;
 
                         case 3:
-                            
+                            aegeanLibrary.ShowAllVideos();
                             break;
 
                         case 4:
                             //Environment.Exit(0);
-                            Console.WriteLine("Showing all Journals");
+                            aegeanLibrary.ShowAllJournals();
                             break;
 
                     }
@@ -213,11 +236,13 @@ namespace Hypatia
                             break;
 
                         case 2:
-                            // Do Stuff
+                            Console.WriteLine("Return an Item");
+                            aegeanLibrary.Return();
                             break;
 
                         case 3:
-
+                            
+                            aegeanLibrary.CurrentLoans();
                             break;
 
                         case 4:

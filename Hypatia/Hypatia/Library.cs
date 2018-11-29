@@ -11,20 +11,23 @@ namespace Hypatia
     class Library
     {
 
-        //public List<Item> Items { get; set; }
+        public List<Item> Items { get; set; }
 
         public User CurrentUser { get; set; }
 
         public List<Book> Books { get; set; }
 
+        public List<Video> Videos { get; set; }
+
+        public List<Journal> Journals { get; set; }
+
         public List<Loan> Loans { get; set; }
 
         public Settings LibrarySettings { get; set; }
 
-        public string FilenamePath { get; set; }
-        //public List<Video> Videos { get; set; }
+        public int MaxNumberOfLoans { get; private set; }
 
-        //public List<Journal> Journals { get; set; }
+        public string FilenamePath { get; set; }
 
         public List<User> Users { get; set; }
 
@@ -34,11 +37,21 @@ namespace Hypatia
         {
             FilenamePath = filenamePath;
 
-            // make sure to load settings upon initializing the library object. 
-            // will fail otherwise ... (if file not found etc.). 
-
+            MaxNumberOfLoans = 5;
+            
+            // This creates AND SANITIZES a Settings Object.
             LoadSettings();
 
+            Items = LibrarySettings.Items;
+            Users = LibrarySettings.Users;
+            Loans = LibrarySettings.Loans;
+
+            User.staticUserID = (LibrarySettings.LastUserID) + 1;
+            Item.staticID = (LibrarySettings.LastItemID) + 1;
+            Loan.staticLoanID = (LibrarySettings.LastLoanID) + 1;
+
+            Instantiate();
+            Individuate();
 
             //Books = new List<Book>();   // Books intentionally not initialized (commented out)
             //int lastid = Item.staticID;
@@ -51,7 +64,14 @@ namespace Hypatia
 
         public void ShowAllItems()
         {
-            Console.WriteLine("will show all items");
+
+            foreach (Item i in Items)
+            {
+
+            }
+
+            Console.WriteLine("Total of "+Items.OfType<Book>().Count()+" books, "+ Items.OfType<Video>().Count() + " videos and "+ Items.OfType<Journal>().Count() + " journals");
+           
 
         }
 
@@ -63,9 +83,10 @@ namespace Hypatia
             }
         }
 
+        // REFACTOR THIS - WILL BE ONLY ONE GENERIC FUNCTION THAT ACCEPTS AN INCOMING ARGUMENT OF WHAT TYPE TO SEARCH FOR. 
         public void ShowAllBooks()
         {
-            foreach (Book b in Books)
+            foreach (Item i in Items)
             {
 
                 /*
@@ -77,20 +98,55 @@ namespace Hypatia
                  *  Ουσιαστικά το χρησιμοποιώ έτσι ώστε να γράψω τη λέξη 'On LOAN' αν είναι δανεισμένο σε κάποιον 
                  *  (αν δηλαδή η OnLoan ιδιότητα είναι TRUE) αλλιώς να γράψω τη λέξη 'AVAILABLE' αν η OnLoan ιδιότητα είναι FALSE. 
                  */
-                Console.WriteLine("ID: [" + b.ItemID + "], \"" + b.Title + "\"" + " by " + b.Author + " --- " + (b.OnLoan ? "On LOAN" : "AVAILABLE"));
+                if (i.GetType() == typeof(Book))
+                {
+                    Console.WriteLine("ID: [" + i.ItemID + "], \"" + i.Title + "\"" + " by " + ((Book)i).Author + " --- " + (i.OnLoan ? "On LOAN" : "AVAILABLE"));
+                }
+                    
             }
         }
 
+        public void ShowAllVideos()
+        {
+            foreach (Item i in Items)
+            {
+
+              
+                if (i.GetType() == typeof(Video))
+                {
+                    Console.WriteLine("ID: [" + i.ItemID + "], \"" + i.Title + "\"" + " with a duration of:  " + ((Video)i).Duration + " min --- " + (i.OnLoan ? "On LOAN" : "AVAILABLE"));
+                }
+
+            }
+        }
+
+        public void ShowAllJournals()
+        {
+            foreach (Item i in Items)
+            {
+
+               
+                if (i.GetType() == typeof(Journal))
+                {
+                    Console.WriteLine("ID: [" + i.ItemID + "], \"" + i.Title + "\"" + " published by:  " + ((Journal)i).Publisher + " --- " + (i.OnLoan ? "On LOAN" : "AVAILABLE"));
+                }
+
+            }
+        }
+        
+
         public void SaveSettings()
         {
-            //string path = "C:\\Users\\tkogias\\Desktop\\Git\\Hypatia\\Hypatia\\hypatia.bks";
-            
 
-            LibrarySettings = new Settings(Books, Users, Loans);
+
+
+            //LibrarySettings = new Settings(Books, Videos, Journals, Users, Loans);
+
+            LibrarySettings = new Settings(Items, Users, Loans);
 
             BinarySerialization.WriteToBinaryFile<Settings>(FilenamePath, LibrarySettings, false);
 
-            //BinarySerialization.WriteToBinaryFile<List<Book>>(path, Books, false);
+            
         }
 
         public void LoadSettings()
@@ -98,16 +154,19 @@ namespace Hypatia
             //Books = BinarySerialization.ReadFromBinaryFile<List<Book>>(path);
             Console.WriteLine("trexei to loadSettings");
 
-            LibrarySettings = BinarySerialization.ReadFromBinaryFile<Settings>(FilenamePath);
+            try
+            {
+                LibrarySettings = BinarySerialization.ReadFromBinaryFile<Settings>(FilenamePath);
+                Console.WriteLine("perasa ok to try");
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                Console.WriteLine("mpika sto catch");
+                LibrarySettings = new Settings(Items, Users, Loans);
+            }
+            
             LibrarySettings.Sanitize();
-
-            Books = LibrarySettings.Books;
-            Users = LibrarySettings.Users;
-            Loans = LibrarySettings.Loans;
-
-            User.staticUserID = (LibrarySettings.LastUserID) + 1;
-            Item.staticID = (LibrarySettings.LastItemID)+1;
-            Loan.staticLoanID = (LibrarySettings.LastLoanID) + 1;
+            
         }
 
         public void CreateUser()
@@ -153,8 +212,23 @@ namespace Hypatia
                     case 1:
                         Console.Write("Give me Author: ");
                         string author = Console.ReadLine();
-                        Books.Add(new Book(title, author));
+                        //Books.Add(new Book(title, author));
+                        Items.Add(new Book(title, author));
                         Console.WriteLine("OK - Book created successfully");
+                        break;
+
+                    case 2:
+                        Console.WriteLine("Give me video duration (in min): ");
+                        int duration = Convert.ToInt32(Console.ReadLine());
+                        Items.Add(new Video(title, duration));
+                        Console.WriteLine("OK - Video created successfully");
+                        break;
+
+                    case 3:
+                        Console.WriteLine("Give me Publisher: ");
+                        string publisher = Console.ReadLine();
+                        Items.Add(new Journal(title, publisher));
+                        Console.WriteLine("Journal created successfully");
                         break;
 
                 }
@@ -173,21 +247,58 @@ namespace Hypatia
             Console.Write("Give me Item ID: ");
             int itemId = Convert.ToInt32(Console.ReadLine());
 
-            Book theBook = Books.Find(x => x.ItemID == itemId);
+            Item theItem = Items.Find(x => x.ItemID == itemId);
 
-            if (theBook.OnLoan)
+            if (theItem.OnLoan)
             {
-                Console.WriteLine("I am sorry mr. " + CurrentUser.Name + " but \"" + theBook.Title + "\" (ID=" + theBook.ItemID + ") is currently on loan");
+                Console.WriteLine("I am sorry mr. " + CurrentUser.Name + " but \"" + theItem.Title + "\" (ID=" + theItem.ItemID + ") is currently on loan");
             }
             else
             {
-                Console.WriteLine("OK " + CurrentUser.Name + ", here is \"" + theBook.Title + "\". Enjoy!");
-                theBook.OnLoan = true;
-                Loans.Add(new Loan(DateTime.Now, theBook, CurrentUser));
+                if (CurrentUser.NumberOfItemsLoaned>=MaxNumberOfLoans)
+                {
+                    Console.WriteLine("Sorry "+CurrentUser.Name+" but you already have "+MaxNumberOfLoans+" loans");
+                }
+                else
+                {
+                    Console.WriteLine("OK " + CurrentUser.Name + ", here is \"" + theItem.Title + "\". Enjoy!");
+                    theItem.OnLoan = true;
+                    CurrentUser.LoanItem();
+                    Loans.Add(new Loan(DateTime.Now, theItem, CurrentUser));
+                }
+                
             }
         }
         
+        public void Return()
+            
+        {
+            Console.WriteLine(CurrentUser.Name+", give me Item ID please: ");
+            int itemID = Convert.ToInt32(Console.ReadLine());
 
+            Loan theLoan = Loans.Find(x => x.ItemLoaned.ItemID == itemID);
+
+            if (theLoan != null)
+            {
+                if (CurrentUser.UserID != theLoan.UserLoaning.UserID)
+                {
+                    Console.WriteLine("I am sorry "+CurrentUser.Name+", but "+theLoan.UserLoaning.Name+" "+"should return the item himself/herself");
+                }
+                else
+                {
+                    Console.WriteLine("OK - Item with ID=" + theLoan.ItemLoaned.ItemID + " is returned to the library.");
+                    theLoan.ItemLoaned.OnLoan = false;
+                    Loans.Remove(theLoan);
+                    CurrentUser.ReturnItem();
+                }
+                
+            }
+            else
+            {
+                Console.WriteLine("*********  There is no such loan for item: " + itemID);
+            }
+            
+        }
         public bool LoginUser()
         {
             Console.WriteLine("Please Enter Your UserID: ");
@@ -206,7 +317,73 @@ namespace Hypatia
             //Loan theLoan = Loans.Find(x => x.ItemToBeLoaned.ID == item.ID);
         }
 
+        // todo: needs refactoring
+        public void CurrentLoans()
+        {
 
+            // this doesn't work - leave it here for further research (how to use 'where')
+            //IEnumerable<Loan> currentLoans = Loans.Where(x => x.UserLoaning.UserID == CurrentUser.UserID);
+            var currentLoans = Loans.FindAll(x => x.UserLoaning.UserID == CurrentUser.UserID);
+            
+            if (currentLoans.Count != 0)
+            {
+                Console.WriteLine("Currently loaned items by "+CurrentUser.Name);
+                foreach (Loan l in Loans)
+                {
+                    Console.WriteLine("\"" + l.ItemLoaned.Title + "\"" + " borrowed on: " + l.DateLoaned.ToShortDateString());
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nNo loans found.");
+            }
+
+            
+        }
+
+        private void Instantiate()
+        {
+            if (Books == null)
+            {
+                Books = new List<Book>();
+            }
+            
+            if (Videos == null)
+            {
+                Videos = new List<Video>();
+            }
+            
+            if (Journals == null)
+            {
+                Journals = new List<Journal>();
+            }
+            
+        }
+
+
+        private void Individuate()
+        {
+            foreach (Item i in Items)
+            {
+                //videotest.GetType() == typeOf(Video)
+                if (i.GetType() == typeof(Book))
+                {
+                    Console.WriteLine("mpainw edw sto individuate - #1");
+                    Books.Add((Book)i);
+                }
+
+                if (i.GetType() == typeof(Video))
+                {
+                    Videos.Add((Video)i);
+                }
+
+                if (i.GetType() == typeof(Journal))
+                {
+                    Journals.Add((Journal)i);
+                }
+
+            }
+        }
     }
 }
 

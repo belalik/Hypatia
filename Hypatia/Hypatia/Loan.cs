@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Hypatia
 {
+    [Serializable]
     class Loan
     {
         public static int staticLoanID;

@@ -12,6 +12,8 @@ namespace Hypatia
     {
         public static int staticUserID;
 
+        public int NumberOfItemsLoaned { get; set; }
+
         public string Name { get; set; }
 
         public int UserID { get; set; }
@@ -26,7 +28,19 @@ namespace Hypatia
             Email = email;
             Telephone = telephone;
 
+            // initial number of items loaned by (new) user is zero. 
+            NumberOfItemsLoaned = 0;
             UserID = staticUserID++;
+        }
+
+        public void LoanItem()
+        {
+            NumberOfItemsLoaned++;
+        }
+
+        public void ReturnItem()
+        {
+            NumberOfItemsLoaned--;
         }
     }
 }
