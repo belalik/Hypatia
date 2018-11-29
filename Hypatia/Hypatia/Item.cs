@@ -8,8 +8,10 @@ namespace Hypatia
 {
     [Serializable] class Item
     {
-        private static int itemId = 10000;
+        public static int staticID;
 
+        
+        
         public Item(string title)
         {
             Title = title;
@@ -17,14 +19,15 @@ namespace Hypatia
             // When I first create an Item, I consider it to be available (onLoan = false). 
             OnLoan = false;
 
-            ItemID = itemId++;
+            ItemID = staticID++;
         }
 
         public string Title { get; set; }
 
         public bool OnLoan { get; set; }
 
-        public int ItemID { get; set; }
+        public int ItemID { get; private set; }
 
+        
     }
 }
