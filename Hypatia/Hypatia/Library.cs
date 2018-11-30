@@ -387,35 +387,3 @@ namespace Hypatia
     }
 }
 
-
-/*
- [Serializable]
-public class Person
-{
-    public string Name { get; set; }
-    public int Age = 20;
-    public Address HomeAddress { get; set;}
-    private string _thisWillGetWrittenToTheFileToo = "even though it is a private variable.";
- 
-    [NonSerialized]
-    public string ThisWillNotBeWrittenToTheFile = "because of the [NonSerialized] attribute.";
-}
- 
-[Serializable]
-public class Address
-{
-    public string StreetAddress { get; set; }
-    public string City { get; set; }
-}
- 
-// And then in some function.
-Person person = new Person() { Name = "Dan", Age = 30; HomeAddress = new Address() { StreetAddress = "123 My St", City = "Regina" }};
-List<Person> people = GetListOfPeople();
-BinarySerialization.WriteToBinaryFile<Person>("C:\person.bin", person);
-BinarySerialization.WriteToBinaryFile<List<People>>("C:\people.bin", people);
- 
-// Then in some other function.
-Person person = BinarySerialization.ReadFromBinaryFile<Person>("C:\person.bin");
-List<Person> people = BinarySerialization.ReadFromBinaryFile<List<Person>>("C:\people.bin");
-    
-    */

@@ -13,7 +13,7 @@ namespace Hypatia
         static string home = "\\\\syros-fs.aegean.gr\\Syros_Staff\\tkogias\\hypatia\\hypatia.save";
         static string uni = "Z:\\hypatia\\hypatia.save";
 
-        static Library aegeanLibrary = new Library(uni);
+        static Library aegeanLibrary = new Library(home);
 
 
         //static Video videotest = new Video("test", 120);

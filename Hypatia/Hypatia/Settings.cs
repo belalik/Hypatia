@@ -59,43 +59,7 @@ namespace Hypatia
 
         public void Sanitize()
         {
-            /*
-            if (Books != null)
-            {
-                //Console.WriteLine("mpika sto if");
-                LastBookID = Books.ElementAt(Books.Count - 1).ItemID;
-            }
-            else
-            {
-                //Console.WriteLine("mpika sto else");
-                Books = new List<Book>();
-                LastBookID = 10000;
-            }
-
-            if (Videos != null)
-            {
-                //Console.WriteLine("mpika sto if");
-                LastVideoID = Videos.ElementAt(Videos.Count - 1).ItemID;
-            }
-            else
-            {
-                //Console.WriteLine("mpika sto else");
-                Videos = new List<Video>();
-                LastBookID = 20000;
-            }
-
-            if (Journals != null)
-            {
-                //Console.WriteLine("mpika sto if");
-                LastJournalID = Journals.ElementAt(Journals.Count - 1).ItemID;
-            }
-            else
-            {
-                //Console.WriteLine("mpika sto else");
-                Journals = new List<Journal>();
-                LastJournalID = 30000;
-            }
-            */
+            
 
             if (Items == null)
             {
