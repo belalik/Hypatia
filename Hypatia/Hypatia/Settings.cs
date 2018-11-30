@@ -91,11 +91,13 @@ namespace Hypatia
 
             if (Loans == null)
             {
+                Console.WriteLine("mpina loans == null");
                 Loans = new List<Loan>();
                 LastLoanID = 3000;
             }
             else if (Loans.Count == 0)
             {
+                Console.WriteLine("mpina loans.count==0");
                 LastLoanID = 3000;
             }
             else
