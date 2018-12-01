@@ -105,7 +105,7 @@ namespace Hypatia
                         Console.WriteLine("[1] Borrow Item");
                         Console.WriteLine("[2] Return Item");
                         Console.WriteLine("[3] Currently Loaned Items");
-                        Console.WriteLine("Back to Main Menu");
+                        Console.WriteLine("[4] Back to Main Menu");
                         Console.WriteLine("--------------------\n");
                         Console.WriteLine("Please select an option\n");
                         break;
@@ -173,6 +173,12 @@ namespace Hypatia
                         case 4:
                             //Environment.Exit(0);
                             Console.WriteLine("Sending lots of emails ....");
+                            break;
+
+                        case 5:
+                            //Environment.Exit(0);
+                            Console.WriteLine("Print all overdue loans...");
+                            aegeanLibrary.PrintOverdueLoans();
                             break;
 
                         case 8:

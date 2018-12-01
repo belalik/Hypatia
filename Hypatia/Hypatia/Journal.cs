@@ -17,5 +17,10 @@ namespace Hypatia
 
             Publisher = publisher;
         }
+
+        public override string ToString()
+        {
+            return "JOURNAL";
+        }
     }
 }

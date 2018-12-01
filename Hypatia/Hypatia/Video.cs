@@ -18,5 +18,11 @@ namespace Hypatia
 
             Duration = duration;
         }
+
+        public override string ToString()
+        {
+            return "VIDEO";
+        }
+
     }
 }

@@ -70,7 +70,7 @@ namespace Hypatia
             List<Video> videos = Items.OfType<Video>().ToList();
 
             List<Journal> journals = Items.OfType<Journal>().ToList();
-
+            
             foreach (Book b in books)
             {
                 Console.WriteLine("BOOK - ID: [" + b.ItemID + "], \"" + b.Title + "\"" + " by " + b.Author + " --- " + (b.OnLoan ? "On LOAN" : "AVAILABLE"));
@@ -119,9 +119,13 @@ namespace Hypatia
                         string name = "";
                         if (AtLeastOneBookLoaned())
                         {
-                            name = Loans.Find(x => x.ItemLoaned.ItemID == b.ItemID).UserLoaning.Name;
-                        }
+                            Loan theLoan = Loans.Find(x => x.ItemLoaned.ItemID == b.ItemID);
+                            if (theLoan != null)
+                            {
+                                name = theLoan.UserLoaning.Name;
+                            }
 
+                        }
 
                         Console.WriteLine("ID: [" + b.ItemID + "], \"" + b.Title + "\"" +
                             " by:  " + b.Author + " min --- " +
@@ -167,9 +171,13 @@ namespace Hypatia
                 {
                     foreach (Video v in videos)
                     {
-                        string name = "";
+                        string name="";
                         if (AtLeastOneVideoLoaned()) {
-                            name = Loans.Find(x => x.ItemLoaned.ItemID == v.ItemID).UserLoaning.Name;
+                            Loan theLoan = Loans.Find(x => x.ItemLoaned.ItemID == v.ItemID);
+                            if (theLoan != null) {
+                                name = theLoan.UserLoaning.Name;
+                            }
+                            
                         }
                         
 
@@ -217,7 +225,12 @@ namespace Hypatia
                         string name = "";
                         if (AtLeastOneJournalLoaned())
                         {
-                            name = Loans.Find(x => x.ItemLoaned.ItemID == j.ItemID).UserLoaning.Name;
+                            Loan theLoan = Loans.Find(x => x.ItemLoaned.ItemID == j.ItemID);
+                            if (theLoan != null)
+                            {
+                                name = theLoan.UserLoaning.Name;
+                            }
+
                         }
 
 
@@ -356,10 +369,16 @@ namespace Hypatia
                 }
                 else
                 {
+                    Console.WriteLine("Let's construct a virtual date for testing purposes... (assuming year = 2018)");
+                    Console.Write("Give me day (no checks for invalid input): ");
+                    int day = Convert.ToInt16(Console.ReadLine());
+                    Console.Write("Give me month (give me 1-12, no checks for invalid input): ");
+                    int month = Convert.ToInt16(Console.ReadLine());
+                    
                     Console.WriteLine("OK " + CurrentUser.Name + ", here is \"" + theItem.Title + "\". Enjoy!");
                     theItem.OnLoan = true;
                     CurrentUser.LoanItem();
-                    Loans.Add(new Loan(DateTime.Now, theItem, CurrentUser));
+                    Loans.Add(new Loan(new DateTime(2018, month, day), theItem, CurrentUser));
                 }
                 
             }
@@ -418,24 +437,132 @@ namespace Hypatia
 
             // this doesn't work - leave it here for further research (how to use 'where')
             //IEnumerable<Loan> currentLoans = Loans.Where(x => x.UserLoaning.UserID == CurrentUser.UserID);
-            var currentLoans = Loans.FindAll(x => x.UserLoaning.UserID == CurrentUser.UserID);
+            var currentUserLoans = Loans.FindAll(x => x.UserLoaning.UserID == CurrentUser.UserID);
             
-            if (currentLoans.Count != 0)
+            if (currentUserLoans.Count != 0)
             {
-                Console.WriteLine("Currently loaned items by "+CurrentUser.Name);
-                foreach (Loan l in Loans)
+                // sort, just for the sake of sorting ... not really applicable here. 
+                // with sorted List, it will show earlier loans first. 
+                // without - it shows loans on the order they were made (and since user enters custom dates, this is really random). 
+                currentUserLoans.Sort((x, y) => DateTime.Compare(x.DateLoaned, y.DateLoaned));
+
+                Console.Write("Currently loaned items by ");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(CurrentUser.Name);
+                Console.ResetColor();
+
+                // make sure to print euro sign correctly (also based on default font used in system's console...)
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+                foreach (Loan l in currentUserLoans)
                 {
-                    Console.WriteLine("\"" + l.ItemLoaned.Title + "\"" + " borrowed on: " + l.DateLoaned.ToShortDateString());
+                    //Console.WriteLine();
+
+                    // IMPORTANT - casting -> (int) truncates, while ConvertToInt would round.  I prefer number to be truncated.. 
+                    int days = (int)(DateTime.Now - l.DateLoaned).TotalDays;
+                    Console.Write(l.ItemLoaned.ToString()+ " \"" + l.ItemLoaned.Title + "\"" + " borrowed on: " + l.DateLoaned.ToShortDateString()+ " --- ");
+
+                    if (l.ItemLoaned.GetType() == typeof(Book))
+                    {
+                        if (days>28)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write("ITEM OVERDUE BY: " + (days - 28) + " days - FINE: "+CalculateFine(l)+ "€");
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write(" DAYS LEFT: " + (28 - days) + " days.");
+                        }
+                    }
+
+                    if (l.ItemLoaned.GetType() == typeof(Journal))
+                    {
+                        if (days > 14)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write("ITEM OVERDUE BY: " + (days - 14) + " days - FINE: " + CalculateFine(l) +"€");
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write(" DAYS LEFT: " + (14 - days) + " days.");   
+                        }
+                    }
+
+                    if (l.ItemLoaned.GetType() == typeof(Video))
+                    {
+                        if (days > 7)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            
+                            Console.Write("ITEM OVERDUE BY: " + (days - 7) + " days - FINE: " + CalculateFine(l) + "€");
+                            
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write(" DAYS LEFT: " + (7 - days) + " days.");
+                        }
+                    }
+                    Console.ResetColor();
+                    Console.WriteLine();
                 }
+                Console.OutputEncoding = System.Text.Encoding.Default;
             }
             else
             {
-                Console.WriteLine("\nNo loans found.");
+                Console.WriteLine("\nNo items loaned to user: "+CurrentUser.Name);
             }
 
             
         }
 
+        public void PrintOverdueLoans()
+        {
+            if (Loans.Count>0)
+            {
+                foreach (Loan l in Loans)
+                {
+                    //Console.WriteLine();
+
+                    // IMPORTANT - casting -> (int) truncates, while ConvertToInt would round.  I prefer number to be truncated.. 
+                    int days = (int)(DateTime.Now - l.DateLoaned).TotalDays;
+                    
+
+                    if (l.ItemLoaned.GetType() == typeof(Book))
+                    {
+                        if (days > 28)
+                        {
+                            PrettyPrintLateLoan(l, days-28);
+                        }
+                       
+                    }
+
+                    if (l.ItemLoaned.GetType() == typeof(Journal))
+                    {
+                        if (days > 14)
+                        {
+                            PrettyPrintLateLoan(l, days-14);
+                        }
+                        
+                    }
+
+                    if (l.ItemLoaned.GetType() == typeof(Video))
+                    {
+                        if (days > 7)
+                        {
+                            PrettyPrintLateLoan(l, days-7);
+
+                        }
+                        
+                    }
+                    Console.ResetColor();
+                    Console.WriteLine();
+                }
+                Console.OutputEncoding = System.Text.Encoding.Default;
+            }
+        }
 
         private bool AtLeastOneVideoLoaned()
         {
@@ -452,6 +579,37 @@ namespace Hypatia
                 return false;
             }
         }
+
+        private void PrettyPrintLateLoan(Loan l, int days)
+        {
+            
+
+            Console.Write(l.ItemLoaned.ToString());
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write(" "+l.ItemLoaned.Title);
+            Console.ResetColor();
+            Console.Write(" [ITEM ID=" + l.ItemLoaned.ItemID + "], borrowed on ");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write(l.DateLoaned.ToShortDateString());
+            Console.ResetColor();
+            Console.Write(" by ");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write(l.UserLoaning.Name);
+            Console.ResetColor();
+            Console.Write(" [USER ID="+l.UserLoaning.UserID+"] \nis ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write(days + " days late ");
+            Console.ResetColor();
+            Console.Write("with a fine, as of today (" + DateTime.Now.ToShortDateString()+") equal to ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.Write(CalculateFine(l) + "€");
+
+            //Console.ResetColor();
+            //Console.OutputEncoding = System.Text.Encoding.Default;
+
+        }
+
 
         private bool AtLeastOneBookLoaned()
         {
@@ -475,6 +633,26 @@ namespace Hypatia
             {
                 return false;
             }
+        }
+
+        private int CalculateFine(Loan late)
+        {
+            // casting in order to truncate - Convert.ToInt would round.. 
+            int days = (int)(DateTime.Now - late.DateLoaned).TotalDays;
+
+            if (late.ItemLoaned.GetType() == typeof(Book))
+            {
+                return (days - 28);
+            }
+            else if (late.ItemLoaned.GetType() == typeof(Journal))
+            {
+                return (days - 14) * 3;
+            }
+            else
+            {
+                return (days - 7) * 5;
+            }
+            
         }
         /*
         private void Instantiate()

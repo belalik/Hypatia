@@ -17,5 +17,9 @@ namespace Hypatia
             Author = author;
         }
         
+        public override string ToString()
+        {
+            return "BOOK";
+        }
     }
 }
