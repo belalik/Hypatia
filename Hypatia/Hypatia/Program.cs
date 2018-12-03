@@ -15,12 +15,13 @@ namespace Hypatia
 
         static Library aegeanLibrary = new Library(home);
 
-
+        
         //static Video videotest = new Video("test", 120);
         //static Book booktest = aegeanLibrary.Books.ElementAt(0);
 
         public static void Main(string[] args)
         {
+            Console.WriteLine("test - latest");
             /*
              * NOTICE the difference in .GetType() == typeOf [answers True only in exact match] 
              * and the 'is' keyword comparison [answers True for exact match OR parent class]
