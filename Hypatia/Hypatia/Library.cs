@@ -33,14 +33,24 @@ namespace Hypatia
 
         //public List<Loan> Loans { get; set; }
 
-        public Library(string filenamePath)
+        public Library(string filenamePath, bool newLibrary)
         {
             FilenamePath = filenamePath;
 
             MaxNumberOfLoans = 5;
             
-            // This creates AND SANITIZES a Settings Object.
-            LoadSettings();
+            // SaveSettings saves new settings - LoadSettings SANITIZES the object.
+
+            if (newLibrary)
+            {
+                SaveSettings();
+                LoadSettings();
+            }
+            else
+            {
+                LoadSettings();
+            }
+            
 
             Items = LibrarySettings.Items;
             Users = LibrarySettings.Users;
@@ -260,16 +270,16 @@ namespace Hypatia
         public void LoadSettings()
         {
             //Books = BinarySerialization.ReadFromBinaryFile<List<Book>>(path);
-            Console.WriteLine("trexei to loadSettings");
+            Console.WriteLine("loading settings ...");
 
             try
             {
                 LibrarySettings = BinarySerialization.ReadFromBinaryFile<Settings>(FilenamePath);
-                Console.WriteLine("perasa ok to try");
+                Console.WriteLine("loading settings -- try statement executed ");
             }
             catch (System.IO.FileNotFoundException)
             {
-                Console.WriteLine("mpika sto catch");
+                Console.WriteLine("loading settings -- catch statement executed ");
                 LibrarySettings = new Settings(Items, Users, Loans);
             }
             

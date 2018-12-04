@@ -41,11 +41,11 @@ namespace Hypatia
             //Journals = journals;
             if (users == null)
             {
-                Console.WriteLine("here it is null");
+                //Console.WriteLine("here it is null");
             }
             else
             {
-                Console.WriteLine("it is NOT NULL !!! and count is: "+users.Count);
+                //Console.WriteLine("it is NOT NULL !!! and count is: "+users.Count);
             }
             Items = items;
             Users = users;
@@ -91,13 +91,13 @@ namespace Hypatia
 
             if (Loans == null)
             {
-                Console.WriteLine("mpina loans == null");
+                //Console.WriteLine("mpika loans == null");
                 Loans = new List<Loan>();
                 LastLoanID = 3000;
             }
             else if (Loans.Count == 0)
             {
-                Console.WriteLine("mpina loans.count==0");
+                //Console.WriteLine("mpika loans.count==0");
                 LastLoanID = 3000;
             }
             else

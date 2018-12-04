@@ -8,37 +8,55 @@ namespace Hypatia
 {
     class Program
     {
-        //aegeanLibrary.SaveBooks("Z:\\hypatia\\hypatia.bks"); 
-        // "\\\\syros-fs.aegean.gr\\Syros_Staff\\tkogias\\hypatia\\hypatia.save"
-        static string home = "\\\\syros-fs.aegean.gr\\Syros_Staff\\tkogias\\hypatia\\hypatia.save";
-        static string uni = "Z:\\hypatia\\hypatia.save";
 
-        static Library aegeanLibrary = new Library(home);
-
-        
-        //static Video videotest = new Video("test", 120);
-        //static Book booktest = aegeanLibrary.Books.ElementAt(0);
-
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("test - latest");
-            /*
+        /*
              * NOTICE the difference in .GetType() == typeOf [answers True only in exact match] 
              * and the 'is' keyword comparison [answers True for exact match OR parent class]
              */
 
-            /*
-            Console.WriteLine("Checking if videotest.GetType() == typeOf(Video): "+(videotest.GetType() == typeof(Video)));
-            Console.WriteLine("Checking if videotest.GetType() == typeOf(Journal): " + (videotest.GetType() == typeof(Journal)));
-            Console.WriteLine("Checking if videotest.GetType() == typeOf(Item): " + (videotest.GetType() == typeof(Item)));
+        /*
+        Console.WriteLine("Checking if videotest.GetType() == typeOf(Video): "+(videotest.GetType() == typeof(Video)));
+        Console.WriteLine("Checking if videotest.GetType() == typeOf(Journal): " + (videotest.GetType() == typeof(Journal)));
+        Console.WriteLine("Checking if videotest.GetType() == typeOf(Item): " + (videotest.GetType() == typeof(Item)));
 
-            Console.WriteLine("Checking (videotest is Video): " + (videotest is Video));
-            Console.WriteLine("Checking (videotest is Journal): " + (videotest is Journal));
-            Console.WriteLine("Checking (videotest is Item): " + (videotest is Item));
+        Console.WriteLine("Checking (videotest is Video): " + (videotest is Video));
+        Console.WriteLine("Checking (videotest is Journal): " + (videotest is Journal));
+        Console.WriteLine("Checking (videotest is Item): " + (videotest is Item));
 
-            Console.ReadLine();
-            */
-            MainMenu();
+        Console.ReadLine();
+        */
+
+        static string path = "";
+        static string filename = "";
+        static string fullPath = "";
+
+        static bool newLibrary = false;
+
+        static Library aegeanLibrary;
+
+        
+        
+
+        public static void Main(string[] args)
+        {
+            
+
+            bool goodToGo = initialize();
+
+            Console.WriteLine("full path is: " + fullPath+ " \ngoodToGo is: "+goodToGo);
+            //Console.ReadLine();
+
+            if (goodToGo)
+            {
+                aegeanLibrary = new Library(fullPath, newLibrary);
+                MainMenu();
+            }
+
+            else
+            {
+                Console.WriteLine("Goodbye ...");
+            }
+            
         }
 
         public static void MainMenu()
@@ -271,48 +289,115 @@ namespace Hypatia
             Console.ReadLine();
         }
 
-        /*
-        static void CreateItem()
+        // ugly method - needs refactoring .... 
+        static bool initialize()
         {
-            
-            Console.WriteLine();
-
-            Console.WriteLine("Creating new Item");
-            Console.WriteLine("[1] Create new BOOK");
-            Console.WriteLine("[2] Create new VIDEO");
-            Console.WriteLine("[3] Create new JOURNAL");
-
+            Console.WriteLine("Where are you? ");
+            Console.WriteLine("1. Home");
+            Console.WriteLine("2. University");
+            Console.Write("Choice: ");
 
             string choice = Console.ReadLine();
-            int number;
-            bool result = Int32.TryParse(choice, out number);
+            int where;
+            bool result = Int32.TryParse(choice, out where);
+
             if (result)
             {
-                Console.WriteLine();
-                Console.Write("Give me Title: ");
-                string title = Console.ReadLine();
+                Console.WriteLine("What do you want to do? ");
+                Console.WriteLine("1. New Library");
+                Console.WriteLine("2. Load Saved Library");
+                Console.Write("Choice: ");
 
-                switch (number)
+                choice = Console.ReadLine();
+                int what;
+                result = Int32.TryParse(choice, out what);
+
+                if (result)
                 {
-                    // in case of BOOK
-                    case 1:
-                        Console.Write("Give me Author: ");
-                        string author = Console.ReadLine();
-                        aegeanLibrary.Books.Add(new Book(title, author));
-                        break;
-
+                    return createPath(where, what);
                 }
-                
+                else
+                {
+                    Console.WriteLine("Incorrect choice - goodbye ... ");
+                    return false;
+                }
             }
             else
             {
-                Console.WriteLine("Incorrect choice");
+                Console.WriteLine("Incorrect choice - goodbye ... ");
+                return false;
             }
 
-            Console.Clear();
-            MainMenu();
+            //int where = Convert.ToInt16()
+            //static string home = "\\\\syros-fs.aegean.gr\\Syros_Staff\\tkogias\\hypatia\\hypatia.save";
+            //static string uni = "Z:\\hypatia\\hypatia.save";
+
         }
-        */
+
+        // same here .. VERY ugly method, needs refactoring ... 
+        // however, researching gave me this: https://stackoverflow.com/questions/556133/whats-the-in-front-of-a-string-in-c
+        // a @ in-front of a string, makes it a 'verbatim' string - anything in the string that would normally be interpreted as an escape sequence is ignored !!!
+        static bool createPath(int where, int what)
+        {
+            if (where==1)
+            {
+                //path = "\\\\syros-fs.aegean.gr\\Syros_Staff\\tkogias\\hypatia\\";
+                path = @"\\syros-fs.aegean.gr\Syros_Staff\tkogias\hypatia\";
+            }
+            else if (where ==2)
+            {
+                //path = "Z:\\hypatia\\";
+                path = @"Z:\hypatia\";
+            }
+            else
+            {
+                return false;
+            }
+
+            if (what==1)
+            {
+                Console.WriteLine("OK - Give me name of new library: ");
+                Console.WriteLine("Careful - if it exists, it will be overwritten.. ");
+                Console.Write("New Library: ");
+                filename = Console.ReadLine()+".save";
+                newLibrary = true;
+                
+            }
+            else if (what==2)
+            {
+                
+                // play around with files
+                string[] filePaths = System.IO.Directory.GetFiles(@path, "*.save",
+                                         System.IO.SearchOption.TopDirectoryOnly);
+                Console.WriteLine("Libraries created so far: ");
+
+                for (int i=0; i<filePaths.Length; i++)
+                {
+                    string file = filePaths[i];
+                    Console.WriteLine((i+1)+". "+ System.IO.Path.GetFileNameWithoutExtension(filePaths[i]));
+                }
+
+                //foreach (string file in filePaths)
+                //{
+                    //Console.WriteLine(System.IO.Path.GetFileNameWithoutExtension(file));
+                    //Console.WriteLine(file);
+                //}
+
+                Console.Write("So, choose which one to load (number): ");
+                
+                filename = System.IO.Path.GetFileName(filePaths[Convert.ToInt32(Console.ReadLine()) - 1]);
+                //filename = Console.ReadLine() + ".save";
+
+            }
+            else
+            {
+                return false;
+            }
+
+            fullPath = path + filename;
+            return true;
+            
+        }
     }
 
 
